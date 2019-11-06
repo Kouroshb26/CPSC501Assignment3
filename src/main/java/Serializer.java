@@ -82,10 +82,7 @@ public class Serializer {
 
             if (!objects.contains(getHashCode(obj))) {
                 objects.add(getHashCode(obj)); //Add it to the hash code
-                rootObject = document.createElement("object");
-                rootObject.setAttribute("class", objClass.getName());
-                rootObject.setAttribute("length", Array.getLength(obj) + "");
-                rootObject.setAttribute("id", getHashCode(obj));
+                rootObject = createRootObject(objClass,obj);
 
                 Object childObject;
                 for (int i = 0; i < Array.getLength(obj); i++) {
@@ -96,7 +93,6 @@ public class Serializer {
                         rootObject.appendChild(serializeSubObject(childObject.getClass(), childObject));
                     }
                 }
-                root.appendChild(rootObject);
             }
             return reference;
 
@@ -106,9 +102,7 @@ public class Serializer {
 
             if (!objects.contains(getHashCode(obj))) { //If we haven't create it make the object and make sure you added it to the root
                 objects.add(getHashCode(obj));
-                rootObject = document.createElement("object");
-                rootObject.setAttribute("id", getHashCode(obj));
-                rootObject.setAttribute("class", objClass.getName());
+                rootObject = createRootObject(objClass, obj);
 
                 Object childObject;
                 for (Field field : objClass.getDeclaredFields()) {
@@ -122,15 +116,26 @@ public class Serializer {
                     } else {
                         fieldXML.appendChild(serializeSubObject(childObject.getClass(), childObject));
                     }
-
                     rootObject.appendChild(fieldXML);
                 }
-                root.appendChild(rootObject);
             }
 
             return reference;
         }
 
+    }
+
+    private Element createRootObject(Class objClass, Object obj) {
+        Element rootObject;
+        rootObject = document.createElement("object");
+        rootObject.setAttribute("id", getHashCode(obj));
+        rootObject.setAttribute("class", objClass.getName());
+        if (objClass.isArray()) {
+            rootObject.setAttribute("length", Array.getLength(obj) + "");
+        }
+
+        root.appendChild(rootObject);
+        return rootObject;
     }
 
     private String getHashCode(Object obj) {
