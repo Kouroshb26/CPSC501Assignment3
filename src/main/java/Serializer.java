@@ -82,16 +82,14 @@ public class Serializer {
 
             if (!objects.contains(getHashCode(obj))) {
                 objects.add(getHashCode(obj)); //Add it to the hash code
-                rootObject = createRootObject(objClass,obj);
+                rootObject = createRootObject(objClass, obj);
 
                 Object childObject;
+                Class childObjectClass;
                 for (int i = 0; i < Array.getLength(obj); i++) {
                     childObject = Array.get(obj, i);
-                    if (objClass.getComponentType().isPrimitive()) {
-                        rootObject.appendChild(serializeSubObject(objClass.getComponentType(), childObject));
-                    } else {
-                        rootObject.appendChild(serializeSubObject(childObject.getClass(), childObject));
-                    }
+                    childObjectClass = objClass.getComponentType().isPrimitive() ? objClass.getComponentType() : childObject.getClass();
+                    rootObject.appendChild(serializeSubObject(childObjectClass, childObject));
                 }
             }
             return reference;
@@ -105,17 +103,16 @@ public class Serializer {
                 rootObject = createRootObject(objClass, obj);
 
                 Object childObject;
+                Class childObjectClass;
                 for (Field field : objClass.getDeclaredFields()) {
                     Element fieldXML = document.createElement("field");
                     fieldXML.setAttribute("declaringClass", field.getType().getSimpleName());
                     fieldXML.setAttribute("name", field.getName());
                     field.setAccessible(true);
                     childObject = field.get(obj);
-                    if (field.getType().isPrimitive()) {
-                        fieldXML.appendChild(serializeSubObject(field.getType(), childObject));
-                    } else {
-                        fieldXML.appendChild(serializeSubObject(childObject.getClass(), childObject));
-                    }
+                    childObjectClass = field.getType().isPrimitive() ? field.getType() : childObject.getClass();
+                    fieldXML.appendChild(serializeSubObject(childObjectClass, childObject));
+
                     rootObject.appendChild(fieldXML);
                 }
             }
