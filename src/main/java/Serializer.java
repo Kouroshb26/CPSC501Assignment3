@@ -4,32 +4,25 @@
  */
 
 import java.io.File;
-import java.io.StringWriter;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import javax.xml.parsers.*;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerConfigurationException;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
+import org.jdom2.Document;
+import org.jdom2.Element;
+import org.jdom2.output.Format;
+import org.jdom2.output.XMLOutputter;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
 
 public class Serializer {
-    private Document document;
     private Element root;
     private ArrayList<String> objects;
-    private Transformer transformer;
+    private static XMLOutputter outputter = new XMLOutputter();
 
-    public static void main(String[] args) throws ParserConfigurationException, TransformerException, IllegalAccessException {
+    public static void main(String[] args) {
 
         Serializer serializer = new Serializer();
         ClassB object = new ClassB(9);
@@ -37,48 +30,42 @@ public class Serializer {
         object.setSwag(object2);
         object2.setSwag(object);
         serializer.serialize(object);
-        serializer.serialize(Arrays.asList(object, object2));
+        Document document = serializer.serialize(Arrays.asList(object, object2));
+        System.out.println(toString(document));
+        toFile(document,"output.txt");
     }
 
-    public void serialize(Object obj) throws TransformerException, IllegalAccessException, ParserConfigurationException {
+    public org.jdom2.Document serialize(Object obj) {
 
-        initialize();
+        Document document = initialize();
         serializeSubObject(obj.getClass(), obj);
-        document.appendChild(root);
 
-        DOMSource domSource = new DOMSource(document);
-        StreamResult streamResult = new StreamResult(new File("hello.txt"));
-        transformer.transform(domSource, streamResult);
+        return document;
     }
 
-    private void initialize() throws ParserConfigurationException, TransformerConfigurationException {
-        DocumentBuilderFactory documentFactory = DocumentBuilderFactory.newInstance();
-        DocumentBuilder documentBuilder = documentFactory.newDocumentBuilder();
-        document = documentBuilder.newDocument();
-        root = document.createElement("serialized");
+    private Document initialize() {
+        root = new Element("serialized");
+        Document document = new Document(root);
         objects = new ArrayList<>();
-
-        transformer = TransformerFactory.newInstance().newTransformer();
-        transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-        transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
+        return document;
     }
 
-    private Element serializeSubObject(Class objClass, Object obj) throws IllegalAccessException {
+    private Element serializeSubObject(Class objClass, Object obj) {
         Element rootObject;
 
-        if (obj == null) {
-            rootObject = document.createElement("value");
-            rootObject.setTextContent("null");
+        if (obj == null) { //is Null
+            rootObject = new Element("value");
+            rootObject.setText("null");
             return rootObject;
 
         } else if (objClass.isPrimitive()) { //is Primitive
-            rootObject = document.createElement("value");
-            rootObject.setTextContent(obj.toString());
+            rootObject = new Element("value");
+            rootObject.setText(obj.toString());
             return rootObject;
 
         } else if (objClass.isArray()) { //is Array
-            Element reference = document.createElement("reference");
-            reference.setTextContent(getHashCode(obj));
+            Element reference = new Element("reference");
+            reference.setText(getHashCode(obj));
 
             if (!objects.contains(getHashCode(obj))) {
                 objects.add(getHashCode(obj)); //Add it to the hash code
@@ -89,14 +76,14 @@ public class Serializer {
                 for (int i = 0; i < Array.getLength(obj); i++) {
                     childObject = Array.get(obj, i);
                     childObjectClass = objClass.getComponentType().isPrimitive() ? objClass.getComponentType() : childObject.getClass();
-                    rootObject.appendChild(serializeSubObject(childObjectClass, childObject));
+                    rootObject.addContent(serializeSubObject(childObjectClass, childObject));
                 }
             }
             return reference;
 
         } else { //is reference
-            Element reference = document.createElement("reference");
-            reference.setTextContent(getHashCode(obj));
+            Element reference = new Element("reference");
+            reference.setText(getHashCode(obj));
 
             if (!objects.contains(getHashCode(obj))) { //If we haven't create it make the object and make sure you added it to the root
                 objects.add(getHashCode(obj));
@@ -105,18 +92,22 @@ public class Serializer {
                 Object childObject;
                 Class childObjectClass;
                 for (Field field : objClass.getDeclaredFields()) {
-                    Element fieldXML = document.createElement("field");
+                    Element fieldXML = new Element("field");
                     fieldXML.setAttribute("declaringClass", field.getType().getSimpleName());
                     fieldXML.setAttribute("name", field.getName());
                     field.setAccessible(true);
-                    childObject = field.get(obj);
+                    try {
+                        childObject = field.get(obj);
+                    } catch (IllegalAccessException e) {
+                        e.printStackTrace();
+                        throw new IllegalStateException(e);
+                    }
                     childObjectClass = field.getType().isPrimitive() ? field.getType() : childObject.getClass();
-                    fieldXML.appendChild(serializeSubObject(childObjectClass, childObject));
+                    fieldXML.addContent(serializeSubObject(childObjectClass, childObject));
 
-                    rootObject.appendChild(fieldXML);
+                    rootObject.addContent(fieldXML);
                 }
             }
-
             return reference;
         }
 
@@ -124,14 +115,14 @@ public class Serializer {
 
     private Element createRootObject(Class objClass, Object obj) {
         Element rootObject;
-        rootObject = document.createElement("object");
+        rootObject = new Element("object");
         rootObject.setAttribute("id", getHashCode(obj));
         rootObject.setAttribute("class", objClass.getName());
         if (objClass.isArray()) {
             rootObject.setAttribute("length", Array.getLength(obj) + "");
         }
 
-        root.appendChild(rootObject);
+        root.addContent(rootObject);
         return rootObject;
     }
 
@@ -139,16 +130,18 @@ public class Serializer {
         return Integer.toHexString(System.identityHashCode(obj));
     }
 
-    //This is for debugging only
-    public String printElement(Node element) {
+    public static String toString(Document document) {
+        outputter.setFormat(Format.getRawFormat());
+        return outputter.outputString(document);
+    }
+
+    public static void toFile(Document document, String fileName) {
         try {
-            StringWriter buffer = new StringWriter();
-            transformer.transform(new DOMSource(element),
-                new StreamResult(buffer));
-            return buffer.toString();
-        } catch (TransformerException e) {
+            outputter.setFormat(Format.getPrettyFormat());
+            outputter.output(document, new FileOutputStream(new File(fileName)));
+        } catch (IOException e) {
             e.printStackTrace();
         }
-        return null;
+
     }
 }
