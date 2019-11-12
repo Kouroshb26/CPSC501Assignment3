@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 import org.jdom2.Document;
 import org.jdom2.Element;
@@ -21,19 +20,6 @@ public class Serializer {
     private Element root;
     private ArrayList<String> objects;
     private static XMLOutputter outputter = new XMLOutputter();
-
-    public static void main(String[] args) {
-
-        Serializer serializer = new Serializer();
-        ClassB object = new ClassB(9);
-        ClassB object2 = new ClassB(10);
-        object.setSwag(object2);
-        object2.setSwag(object);
-        serializer.serialize(object);
-        Document document = serializer.serialize(Arrays.asList(object, object2));
-        System.out.println(toString(document));
-        toFile(document,"output.txt");
-    }
 
     public org.jdom2.Document serialize(Object obj) {
 
@@ -75,7 +61,7 @@ public class Serializer {
                 Class childObjectClass;
                 for (int i = 0; i < Array.getLength(obj); i++) {
                     childObject = Array.get(obj, i);
-                    childObjectClass = objClass.getComponentType().isPrimitive() ? objClass.getComponentType() : childObject.getClass();
+                    childObjectClass = objClass.getComponentType();
                     rootObject.addContent(serializeSubObject(childObjectClass, childObject));
                 }
             }
@@ -93,7 +79,8 @@ public class Serializer {
                 Class childObjectClass;
                 for (Field field : objClass.getDeclaredFields()) {
                     Element fieldXML = new Element("field");
-                    fieldXML.setAttribute("declaringClass", field.getType().getSimpleName());
+                    fieldXML.setAttribute("declaringClass", field.getDeclaringClass().getSimpleName());
+
                     fieldXML.setAttribute("name", field.getName());
                     field.setAccessible(true);
                     try {

@@ -2,11 +2,6 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerConfigurationException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-
 import org.jdom2.Document;
 
 /**
@@ -21,7 +16,7 @@ public class Client {
             ObjectOutputStream outputStream = new ObjectOutputStream(socket.getOutputStream());
             Serializer serializer = new Serializer();
             Document document = serializer.serialize("asdfasfdfasfasd");
-            outputStream.writeObject(Serializer.toString(document));
+            outputStream.writeObject(document);
             outputStream.flush();
             socket.close();
         } catch (IOException e) {
