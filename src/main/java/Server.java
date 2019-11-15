@@ -11,10 +11,10 @@ import org.jdom2.Document;
  * @since 2019-11-10
  */
 public class Server {
-    public static final String serverAddress = "localhost";
-    public static final int serverPort = 4444;
-    public static final Deserializer deserializer = new Deserializer();
-    public static final Inspector inspector = new Inspector();
+    public static final int serverPort = 6365;
+    private static final Deserializer deserializer = new Deserializer();
+    private static final String serverAddress = "localhost";
+    private static final Inspector inspector = new Inspector();
 
 
     public static void main(String[] args) {

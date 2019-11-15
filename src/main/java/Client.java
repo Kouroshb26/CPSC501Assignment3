@@ -22,7 +22,7 @@ public class Client {
 
     public static void main(String[] args) {
         while (true) {
-            try (Socket socket = new Socket(Server.serverAddress, Server.serverPort)) {
+            try (Socket socket = new Socket(args[0], Server.serverPort)) {
                 ObjectOutputStream outputStream = new ObjectOutputStream(socket.getOutputStream());
                 Object object = createObject();
 
