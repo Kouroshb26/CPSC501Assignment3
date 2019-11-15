@@ -94,13 +94,7 @@ public class Serializer {
                 for (int i = 0; i < Array.getLength(obj); i++) {
                     childObject = Array.get(obj, i);
                     //Get correct object class
-                    if (childObject == null) {
-                        childObjectClass = null;
-                    } else if (objClass.getComponentType().isPrimitive()) {
-                        childObjectClass = objClass.getComponentType();
-                    } else {
-                        childObjectClass = childObject.getClass();
-                    }
+                    childObjectClass = getChildClass(objClass.getComponentType(), childObject);
                     rootObject.addContent(serializeSubObject(childObjectClass, childObject));
                 }
             }
@@ -128,7 +122,7 @@ public class Serializer {
                         e.printStackTrace();
                         throw new IllegalStateException(e);
                     }
-                    childObjectClass = field.getType().isPrimitive() ? field.getType() : childObject.getClass();
+                    childObjectClass = getChildClass(field.getType(), childObject);
                     fieldXML.addContent(serializeSubObject(childObjectClass, childObject));
 
                     rootObject.addContent(fieldXML);
@@ -137,5 +131,17 @@ public class Serializer {
             return reference;
         }
 
+    }
+
+    private Class getChildClass(Class objClass, Object childObject) {
+        Class childObjectClass;
+        if (childObject == null) {
+            childObjectClass = null;
+        } else if (objClass.isPrimitive()) {
+            childObjectClass = objClass;
+        } else {
+            childObjectClass = childObject.getClass();
+        }
+        return childObjectClass;
     }
 }
