@@ -2,8 +2,8 @@ package objects;
 
 public class Student2 {
 
-    private int studentID = 100200300;
-    private double grade = 57.1;
+    private int studentID;
+    private double grade;
     private Student2 friend;
 
     public Student2() {

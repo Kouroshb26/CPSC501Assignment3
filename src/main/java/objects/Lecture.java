@@ -8,7 +8,14 @@ import java.util.Arrays;
  */
 public class Lecture {
 
-    private int[] studentIDs = new int[10];
+    private int[] studentIDs;
+
+    public Lecture() {
+    }
+
+    public Lecture(int size) {
+        studentIDs = new int[size];
+    }
 
     public void setStudent(int index, int studentID) {
         this.studentIDs[index] = studentID;

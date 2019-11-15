@@ -18,19 +18,20 @@ public class Server {
 
     public static void main(String[] args) {
 
-        while (true) {
-            try (ServerSocket serverSocket = new ServerSocket(serverPort)) {
+        try (ServerSocket serverSocket = new ServerSocket(serverPort)) {
+            while (true) {
                 try (Socket socket = serverSocket.accept()) {
                     ObjectInputStream inputStream = new ObjectInputStream(socket.getInputStream());
                     Document document = (Document) inputStream.readObject();
+                    System.out.println("The xml that was sent over:");
+                    System.out.println(Serializer.toString(document));
                     deserializer.deserialize(document);
                 } catch (ClassNotFoundException e) {
                     e.printStackTrace();
                 }
-
-            } catch (IOException e) {
-                e.printStackTrace();
             }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }

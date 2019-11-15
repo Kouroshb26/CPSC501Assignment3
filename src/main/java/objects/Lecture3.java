@@ -9,7 +9,16 @@ import java.util.Objects;
  */
 public class Lecture3 {
 
-    private ArrayList<Student> students = new ArrayList<>(10);
+    private ArrayList<Student> students;
+
+    public Lecture3() {
+
+    }
+
+    public Lecture3(int size) {
+        students = new ArrayList<>(size);
+
+    }
 
     public void setStudent(int index, Student student) {
         students.set(index, student);
