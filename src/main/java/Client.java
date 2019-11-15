@@ -65,11 +65,7 @@ public class Client {
 
         switch (selection) {
             case 1:
-                System.out.println("Enter a student ID (int)");
-                id = scanner.nextInt();
-                System.out.println("Enter a student grade (double)");
-                grade = scanner.nextDouble();
-                return new Student(id, grade);
+                return createStudent();
             case 2:
                 System.out.println("Creating first Student");
                 System.out.println("Enter a student ID (int)");
@@ -106,11 +102,7 @@ public class Client {
                 System.out.println("Enter index to set");
                 index = scanner.nextInt();
                 System.out.println("Creating student object");
-                System.out.println("Enter a student ID (int)");
-                id = scanner.nextInt();
-                System.out.println("Enter a student grade (double)");
-                grade = scanner.nextDouble();
-                lecture2.setStudent(index, new Student(id, grade));
+                lecture2.setStudent(index, createStudent());
                 return lecture2;
             case 5:
                 System.out.println("Enter size of array");
@@ -119,15 +111,21 @@ public class Client {
                 System.out.println("Enter index to set");
                 index = scanner.nextInt();
                 System.out.println("Creating student object");
-                System.out.println("Enter a student ID (int)");
-                id = scanner.nextInt();
-                System.out.println("Enter a student grade (double)");
-                grade = scanner.nextDouble();
-                lecture3.setStudent(index, new Student(id, grade));
+                lecture3.setStudent(index, createStudent());
                 return lecture3;
             default:
                 return null;
         }
+    }
+
+    private static Student createStudent() {
+        int id;
+        double grade;
+        System.out.println("Enter a student ID (int)");
+        id = scanner.nextInt();
+        System.out.println("Enter a student grade (double)");
+        grade = scanner.nextDouble();
+        return new Student(id, grade);
     }
 }
 
