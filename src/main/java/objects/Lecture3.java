@@ -17,6 +17,9 @@ public class Lecture3 {
 
     public Lecture3(int size) {
         students = new ArrayList<>(size);
+        for (int i = 0; i < size; i++) {
+            students.add(null);
+        }
 
     }
 

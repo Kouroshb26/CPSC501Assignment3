@@ -14,6 +14,7 @@ public class Server {
     public static final String serverAddress = "localhost";
     public static final int serverPort = 4444;
     public static final Deserializer deserializer = new Deserializer();
+    public static final Inspector inspector = new Inspector();
 
 
     public static void main(String[] args) {
@@ -25,7 +26,9 @@ public class Server {
                     Document document = (Document) inputStream.readObject();
                     System.out.println("The xml that was sent over:");
                     System.out.println(Serializer.toString(document));
-                    deserializer.deserialize(document);
+                    Object object = deserializer.deserialize(document);
+                    inspector.inspect(object);
+
                 } catch (ClassNotFoundException e) {
                     e.printStackTrace();
                 }
@@ -34,4 +37,5 @@ public class Server {
             e.printStackTrace();
         }
     }
+
 }
