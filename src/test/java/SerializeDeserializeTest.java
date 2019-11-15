@@ -2,6 +2,7 @@ import org.junit.Test;
 
 import objects.Lecture;
 import objects.Lecture2;
+import objects.Lecture3;
 import objects.Student;
 import objects.Student2;
 
@@ -43,7 +44,7 @@ public class SerializeDeserializeTest {
 
     @Test
     public void testPrimitiveArray() {
-        Lecture lecture = new Lecture();
+        Lecture lecture = new Lecture(10);
         lecture.setStudent(5, 12329238);
         Object actualLecture = deserializer.deserialize(serializer.serialize(lecture));
         assertEquals(lecture, actualLecture);
@@ -52,7 +53,7 @@ public class SerializeDeserializeTest {
 
     @Test
     public void testReferenceArray() {
-        Lecture2 lecture = new Lecture2();
+        Lecture2 lecture = new Lecture2(10);
         lecture.setStudent(5, new Student(1843983, 69.29));
         Object actualLecture = deserializer.deserialize(serializer.serialize(lecture));
         assertEquals(lecture, actualLecture);
@@ -60,7 +61,7 @@ public class SerializeDeserializeTest {
 
     @Test
     public void testReferenceCollections() {
-        Lecture2 lecture = new Lecture2();
+        Lecture3 lecture = new Lecture3(10);
         lecture.setStudent(5, new Student(1843983, 69.29));
         Object actualLecture = deserializer.deserialize(serializer.serialize(lecture));
         assertEquals(lecture, actualLecture);

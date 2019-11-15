@@ -36,6 +36,38 @@ public class Serializer {
         return document;
     }
 
+    public static void toFile(Document document, String fileName) {
+        try (FileOutputStream fileOutputStream = new FileOutputStream(new File(fileName))) {
+            outputter.setFormat(Format.getPrettyFormat());
+            outputter.output(document, fileOutputStream);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    private Element createRootObject(Class objClass, Object obj) {
+        Element rootObject;
+        rootObject = new Element("object");
+        rootObject.setAttribute("id", getHashCode(obj));
+        rootObject.setAttribute("class", objClass.getName());
+        if (objClass.isArray()) {
+            rootObject.setAttribute("length", Array.getLength(obj) + "");
+        }
+
+        root.addContent(rootObject);
+        return rootObject;
+    }
+
+    private String getHashCode(Object obj) {
+        return Integer.toHexString(System.identityHashCode(obj));
+    }
+
+    public static String toString(Document document) {
+        outputter.setFormat(Format.getRawFormat());
+        return outputter.outputString(document);
+    }
+
     private Element serializeSubObject(Class objClass, Object obj) {
         Element rootObject;
 
@@ -61,7 +93,14 @@ public class Serializer {
                 Class childObjectClass;
                 for (int i = 0; i < Array.getLength(obj); i++) {
                     childObject = Array.get(obj, i);
-                    childObjectClass = objClass.getComponentType();
+                    //Get correct object class
+                    if (childObject == null) {
+                        childObjectClass = null;
+                    } else if (objClass.getComponentType().isPrimitive()) {
+                        childObjectClass = objClass.getComponentType();
+                    } else {
+                        childObjectClass = childObject.getClass();
+                    }
                     rootObject.addContent(serializeSubObject(childObjectClass, childObject));
                 }
             }
@@ -96,38 +135,6 @@ public class Serializer {
                 }
             }
             return reference;
-        }
-
-    }
-
-    private Element createRootObject(Class objClass, Object obj) {
-        Element rootObject;
-        rootObject = new Element("object");
-        rootObject.setAttribute("id", getHashCode(obj));
-        rootObject.setAttribute("class", objClass.getName());
-        if (objClass.isArray()) {
-            rootObject.setAttribute("length", Array.getLength(obj) + "");
-        }
-
-        root.addContent(rootObject);
-        return rootObject;
-    }
-
-    private String getHashCode(Object obj) {
-        return Integer.toHexString(System.identityHashCode(obj));
-    }
-
-    public static String toString(Document document) {
-        outputter.setFormat(Format.getRawFormat());
-        return outputter.outputString(document);
-    }
-
-    public static void toFile(Document document, String fileName) {
-        try {
-            outputter.setFormat(Format.getPrettyFormat());
-            outputter.output(document, new FileOutputStream(new File(fileName)));
-        } catch (IOException e) {
-            e.printStackTrace();
         }
 
     }
