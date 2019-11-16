@@ -14,6 +14,7 @@ public class Inspector {
 
     private void inspectClass(Class c, Object obj, boolean recursive, int depth) {
         String prefix = getPrefixString(depth);
+        System.out.println(prefix + "Object Hash code is " + Integer.toHexString(System.identityHashCode(obj)));
         if (visited.contains(System.identityHashCode(obj))) {
             System.out.println(prefix + "Already visited this object");
             return;
