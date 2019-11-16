@@ -15,12 +15,6 @@ public class Deserializer {
     private HashMap<String, Object> objectReference = new HashMap<>();
     private Element root;
 
-    public static void main(String[] args) {
-        Serializer serializer = new Serializer();
-        Object object = new Deserializer().deserialize(serializer.serialize("12343"));
-
-    }
-
     public Object deserialize(org.jdom2.Document document) {
         root = document.getRootElement();
         return deserialize(root.getChildren().get(0));

@@ -41,7 +41,7 @@ public class Inspector {
         System.out.println(prefix + "The contents of the array is : " + objectToString(obj, c));
         for (int i = 0; i < Array.getLength(obj); i++) {
             if (!c.getComponentType().isPrimitive() && recursive && Array.get(obj, i) != null) {
-                inspectClass(c.getComponentType(), Array.get(obj, i), recursive, depth + 1);
+                inspectClass(getChildClass(c.getComponentType(), Array.get(obj, i)), Array.get(obj, i), recursive, depth + 1);
             }
         }
     }
@@ -61,7 +61,7 @@ public class Inspector {
                         Object fieldObject = field.get(obj);
                         System.out.println(prefix + " The value of the field is " + objectToString(fieldObject, field.getType()));
                         if (recursive && !field.getType().isPrimitive() && fieldObject != null) {
-                            inspectClass(field.getType(), fieldObject, recursive, depth + 1);
+                            inspectClass(getChildClass(field.getType(), fieldObject), fieldObject, recursive, depth + 1);
                         }
                     } else {
                         System.out.println(prefix + "Object is null, thus no field value can be accessed");
@@ -104,5 +104,17 @@ public class Inspector {
         } else {
             return type.getName() + "@" + Integer.toHexString(System.identityHashCode(obj));
         }
+    }
+
+    private Class getChildClass(Class objClass, Object childObject) {
+        Class childObjectClass;
+        if (childObject == null) {
+            childObjectClass = null;
+        } else if (objClass.isPrimitive()) {
+            childObjectClass = objClass;
+        } else {
+            childObjectClass = childObject.getClass();
+        }
+        return childObjectClass;
     }
 }
